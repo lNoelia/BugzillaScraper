@@ -1,0 +1,5 @@
+## Web Scraping Libraries
+beautifulsoup4
+requests
+#DotEnv
+python-dotenv

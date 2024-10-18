@@ -1,0 +1,22 @@
+ID,Summary,Status,Resolution,Classification
+18717,NullPointerException in ApplicationWindow when no menubar added,RESOLVED,FIXED,Eclipse Project
+23463,[About] splash screen of version 2.1 shows version 2.0 only,RESOLVED,FIXED,Eclipse Project
+27974,[Editor Mgmt] NPE closing perspectives,RESOLVED,FIXED,Eclipse Project
+541541,Build I20181125-1800 failed due to Platform Team changes,RESOLVED,FIXED,Eclipse Project
+5238,Compare fails if takes more than 20 seconds,RESOLVED,FIXED,Eclipse Project
+5324,Compare view does not support copy shortcuts + save shortcut,RESOLVED,FIXED,Eclipse Project
+6271,Can't tell which file is which in Compare browser,RESOLVED,FIXED,Eclipse Project
+6346,Problems with Patch,RESOLVED,FIXED,Eclipse Project
+6727,Patch: *.rej file must be saved in workspace,RESOLVED,FIXED,Eclipse Project
+7358,Internal Error in Compare with Patch with new files,RESOLVED,FIXED,Eclipse Project
+7821,Team 2.0 CVS synchronze bug <no-name> dirs..,RESOLVED,FIXED,Eclipse Project
+8089,Replace from local history: parse error,RESOLVED,FIXED,Eclipse Project
+8363,NPE comparing two resources in the navigator.,RESOLVED,FIXED,Eclipse Project
+8857,An error has occurred when creating this editor,RESOLVED,FIXED,Eclipse Project
+9153,NPE when closing synchronize view,RESOLVED,FIXED,Eclipse Project
+9331,NPE during compare with stream version,RESOLVED,FIXED,Eclipse Project
+9869,Need more support for creating/deleting resources,RESOLVED,FIXED,Eclipse Project
+10434,Compare browser fails silently and does not give result,RESOLVED,FIXED,Eclipse Project
+13152,Internal error in "Add from Local History..." on packages,RESOLVED,FIXED,Eclipse Project
+13606,Support multiple selection in Add from local history,RESOLVED,FIXED,Eclipse Project
+14371,TextMergeViewer.sameDoc() is broken,RESOLVED,FIXED,Eclipse Project
