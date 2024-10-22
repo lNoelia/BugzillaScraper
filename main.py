@@ -1,7 +1,7 @@
 from dotenv import load_dotenv
 import os
 
-from src.utils import get_resolution_options, get_status_options, choose_resolution_status
+from src.utils import get_resolution_options, get_status_options, choose_resolution_status, ask_user_input_y_or_n
 from src.scraper import get_list_issues, get_filtered_issues
 
 #Load DotEnv
@@ -24,12 +24,14 @@ def main():
                 status = status_options[int(resolution_status[1])-1]
                 print("Resolution and Status selected:"+ resolution+ " and "+ status)
                 result_file='data/list_issues_'+resolution+'_'+status+'.txt'
+                # Check if we already have the list of issues 
                 if os.path.exists(result_file):
-                    get_list_again = input("Would you like to get the list of issues again? (y/n): ")
-                    if get_list_again.lower() == 'y':
+                    get_list_again = ask_user_input_y_or_n()
+                    if get_list_again == 'y':
                         get_list_issues(url,resolution, status)
                 else:
                     get_list_issues(url,resolution, status)
+                # Get the filtered issues    
                 get_filtered_issues(resolution, status)
                 
             elif number == 2:
