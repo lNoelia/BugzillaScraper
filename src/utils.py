@@ -49,3 +49,11 @@ def choose_resolution_status(resolution_options, status_options):
         print(f"{i+1}. {option}")
     status = input("Select a status option: ")
     return resolution, status
+
+def ask_user_input_y_or_n():
+    while True:
+        get_list_again = input("Would you like to get the list of issues again? (y/n): ")
+        if get_list_again.lower() in ('y', 'n'):
+            return get_list_again.lower()
+        else:
+            print("Invalid input. Please use 'y' or 'n'.")
