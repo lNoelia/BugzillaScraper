@@ -42,7 +42,7 @@ def get_filtered_issues(resolution,status):
             "Deadline", "Target Milestone", "Creator", "Creator Detail", "Creation time", "Assigned to", 
             "Assigned to detail", "CC", "CC detail", "Is CC accessible", "Is confirmed", "Is open", 
             "Is creator accessible", "Summary", "Description", "URL", "Whiteboard", "Keywords", "See also", 
-            "Last change time", "QA contact", "Comments", "Attachments"
+            "Last change time", "QA contact","History/Activity Log", "Comments", "Attachments"
         ]
 
         writer.writerow(header)
@@ -76,6 +76,20 @@ def get_filtered_issues(resolution,status):
                     else:
                         print("Failed to get bug information. Please check the URL provided on the configuration file.")
 
+                    ## Bug HISTORY (Activity log)
+                    history_url = base_url + '/history'
+                    response = requests.get(history_url)
+                    if response.status_code == 200:
+                        history_data = response.json()
+                        # Get all the bug history
+                        history = history_data.get('bugs', {})[0].get("history", {})
+                        # Convert history to JSON string
+                        history_json = json.dumps(history)
+                        row.append(history_json)
+                    else:
+                        print("Failed to get bug history. Please try again.")
+                        row.append("")
+
                     ## Comments and description
                     comment_url = base_url + '/comment'
                     response = requests.get(comment_url)
@@ -101,13 +115,11 @@ def get_filtered_issues(resolution,status):
                     attachment_url = base_url + '/attachment'
                     response = requests.get(attachment_url)
                     if response.status_code == 200:
-                        print("ATTACHMEEEENT")
                         attachment_data = response.json()
                         # Get all the bug attachments
                         attachments = attachment_data.get('bugs', {}).get(bug_id, [])
                         # Convert attachments to JSON string
                         attachments_json = json.dumps(attachments)
-                        print(attachments_json)
                         row.append(attachments_json)
                     else:
                         print("Failed to get bug attachments. Please try again.")
