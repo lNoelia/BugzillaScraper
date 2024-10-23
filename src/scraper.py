@@ -42,7 +42,7 @@ def get_filtered_issues(resolution,status):
             "Deadline", "Target Milestone", "Creator", "Creator Detail", "Creation time", "Assigned to", 
             "Assigned to detail", "CC", "CC detail", "Is CC accessible", "Is confirmed", "Is open", 
             "Is creator accessible", "Summary", "Description", "URL", "Whiteboard", "Keywords", "See also", 
-            "Last change time", "QA contact", "Comments"
+            "Last change time", "QA contact", "Comments", "Attachments"
         ]
 
         writer.writerow(header)
@@ -81,9 +81,11 @@ def get_filtered_issues(resolution,status):
                     response = requests.get(comment_url)
                     if response.status_code == 200:
                         comment_data = response.json()
+                        # Get all the bug comments
                         bug_comments = comment_data.get('bugs', {}).get(bug_id, {})
                         description = ""
                         bug_comments_split = bug_comments.get('comments', [])
+                        # Find the description (count=0)
                         for comment in bug_comments_split:
                             if comment.get('count') == 0:
                                 description = comment.get('text').replace('\n', '\\n').replace('\r', '\\r').replace('\"', '\\\"')
@@ -94,6 +96,24 @@ def get_filtered_issues(resolution,status):
                     else:
                         print("Failed to get bug comments. Please try again.")
                         row.append("")
+
+                    ## Attachments
+                    attachment_url = base_url + '/attachment'
+                    response = requests.get(attachment_url)
+                    if response.status_code == 200:
+                        print("ATTACHMEEEENT")
+                        attachment_data = response.json()
+                        # Get all the bug attachments
+                        attachments = attachment_data.get('bugs', {}).get(bug_id, [])
+                        # Convert attachments to JSON string
+                        attachments_json = json.dumps(attachments)
+                        print(attachments_json)
+                        row.append(attachments_json)
+                    else:
+                        print("Failed to get bug attachments. Please try again.")
+                        row.append("")
+                    
+                    #Finally, we write all the information for this bug in the result file
                     writer.writerow(row)
         except FileNotFoundError:
             print(f"Error: The file '{file}' was not found.")
