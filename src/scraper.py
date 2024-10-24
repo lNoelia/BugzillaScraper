@@ -68,7 +68,7 @@ def get_filtered_issues(resolution,status):
                             bug.get('priority'), bug.get('deadline'), bug.get('target_milestone'), bug.get('creator'), 
                             bug.get('creator_detail'), bug.get('creation_time'), bug.get('assigned_to'), 
                             bug.get('assigned_to_detail'), bug.get('cc'), bug.get('cc_detail'), 
-                            bug.get('is_cc_accesible'), bug.get('is_confirmed'), bug.get('is_open'), 
+                            bug.get('is_cc_accessible'), bug.get('is_confirmed'), bug.get('is_open'), 
                             bug.get('is_creator_accessible'), bug.get('summary'), "BUG_DESCRIPTION", bug.get('url'), 
                             bug.get('whiteboard'), bug.get('keywords'), bug.get('see_also'), bug.get('last_change_time'), 
                             bug.get('qa_contact')
