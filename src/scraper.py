@@ -3,6 +3,7 @@ import os
 from dotenv import load_dotenv
 import csv
 import json
+import time
 
 load_dotenv()
 
@@ -32,6 +33,10 @@ def get_filtered_issues(resolution,status):
     file = 'data/list_issues_'+resolution+'_'+status+'.txt'
     result_file='data/filtered_issues_'+resolution+'_'+status+'.csv'
 
+    ## Headers for all request:
+    headers = {
+        'Accept': 'application/json'  # Especifica que esperas una respuesta en JSON
+    }
     with open(result_file, 'w', encoding='utf-8',newline='', errors='surrogateescape') as res_file:
         writer = csv.writer(res_file)
         #Header of result file
@@ -55,7 +60,7 @@ def get_filtered_issues(resolution,status):
                     bug_id = line.split(',')[0]
                     base_url = os.getenv('MAIN_PAGE') + '/rest/bug/' + bug_id
                     ## Base information
-                    response = requests.get(base_url)
+                    response = requests.get(base_url, headers=headers)
                     if response.status_code == 200:
                         data = response.json()
                         bug = data.get('bugs', [])[0]
@@ -78,7 +83,7 @@ def get_filtered_issues(resolution,status):
 
                     ## Bug HISTORY (Activity log)
                     history_url = base_url + '/history'
-                    response = requests.get(history_url)
+                    response = requests.get(history_url, headers=headers)
                     if response.status_code == 200:
                         history_data = response.json()
                         # Get all the bug history
@@ -92,7 +97,7 @@ def get_filtered_issues(resolution,status):
 
                     ## Comments and description
                     comment_url = base_url + '/comment'
-                    response = requests.get(comment_url)
+                    response = requests.get(comment_url, headers=headers)
                     if response.status_code == 200:
                         comment_data = response.json()
                         # Get all the bug comments
@@ -113,7 +118,7 @@ def get_filtered_issues(resolution,status):
 
                     ## Attachments
                     attachment_url = base_url + '/attachment'
-                    response = requests.get(attachment_url)
+                    response = requests.get(attachment_url, headers=headers)
                     if response.status_code == 200:
                         attachment_data = response.json()
                         # Get all the bug attachments
@@ -127,6 +132,7 @@ def get_filtered_issues(resolution,status):
                     
                     #Finally, we write all the information for this bug in the result file
                     writer.writerow(row)
+                    time.sleep(0.1)## Avoiding to be blocked by the server
         except FileNotFoundError:
             print(f"Error: The file '{file}' was not found.")
         except Exception as e:
