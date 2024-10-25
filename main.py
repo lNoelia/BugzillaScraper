@@ -1,3 +1,4 @@
+#import signal
 from dotenv import load_dotenv
 import os
 
@@ -7,11 +8,22 @@ from src.scraper import get_list_issues, get_filtered_issues
 #Load DotEnv
 load_dotenv()
 
+# Handler to raise exception on timeout
+# class TimeoutException(Exception):
+#     pass
+
+# def timeout_handler(signum, frame):
+#     raise TimeoutException
+
+# signal.signal(signal.SIGALRM, timeout_handler)
+
 def main():
  while True:
         try:
+            #signal.alarm(120) 
             # Prompt the user to enter a number
             number = int(input("Enter a number from 1 to 4 (or 0 to exit): "))
+            #signal.alarm(0) # Reset the alarm(in case we recieve information from the user)
             if number == 1:
                 url = os.getenv('MAIN_PAGE')
                 if(url.endswith('/')):
