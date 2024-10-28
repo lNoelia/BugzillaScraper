@@ -37,7 +37,7 @@ def get_filtered_issues(resolution,status):
     headers = {
         'Accept': 'application/json'  # Especifica que esperas una respuesta en JSON
     }
-    with open(result_file, 'w', encoding='utf-8',newline='', errors='surrogateescape') as res_file:
+    with open(result_file, 'w', encoding='utf-8',newline='', escapechar='\\', errors='surrogateescape') as res_file:
         writer = csv.writer(res_file)
         #Header of result file
         ## bug_url, id, alias, classification, component, product, version, platform, op_sys, status, resolution, depends_on, dupe_of, blocks, groups, flags, severity, priority, deadline, target_milestone, creator, creator_detail , creation_time, assigned_to, assigned_to_detail,cc ,cc_detail,is_cc_acessible, is_confirmed, is_open, is_creator_accessible, summary, description, url(something related to bug),whiteboard, keywords, see_also, last_change_time, qa_contact
