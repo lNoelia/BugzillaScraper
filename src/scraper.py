@@ -56,88 +56,103 @@ def get_filtered_issues(resolution,status):
             with open(file, 'r',encoding='utf-8', errors='surrogateescape') as f:
                 lines = f.readlines()
                 print(f"Total lines in input file: {len(lines)}")  # Debugging: print total number of lines
-                for line in lines[1:]:
-                    bug_id = line.split(',')[0]
-                    base_url = os.getenv('MAIN_PAGE') + '/rest/bug/' + bug_id
-                    ## Base information
-                    response = requests.get(base_url, headers=headers)
-                    if response.status_code == 200:
-                        data = response.json()
-                        bug = data.get('bugs', [])[0]
-                        bug_url = os.getenv('MAIN_PAGE') + 'show_bug.cgi?id=' + str(bug.get('id'))
-                        row = [
-                            bug_url, bug.get('id'), bug.get('alias'), bug.get('classification'), bug.get('component'), 
-                            bug.get('product'), bug.get('version'), bug.get('platform'), bug.get('op_sys'), 
-                            bug.get('status'), bug.get('resolution'), bug.get('depends_on'), bug.get('dupe_of'), 
-                            bug.get('blocks'), bug.get('groups'), bug.get('flags'), bug.get('severity'), 
-                            bug.get('priority'), bug.get('deadline'), bug.get('target_milestone'), bug.get('creator'), 
-                            bug.get('creator_detail'), bug.get('creation_time'), bug.get('assigned_to'), 
-                            bug.get('assigned_to_detail'), bug.get('cc'), bug.get('cc_detail'), 
-                            bug.get('is_cc_accessible'), bug.get('is_confirmed'), bug.get('is_open'), 
-                            bug.get('is_creator_accessible'), bug.get('summary'), "BUG_DESCRIPTION", bug.get('url'), 
-                            bug.get('whiteboard'), bug.get('keywords'), bug.get('see_also'), bug.get('last_change_time'), 
-                            bug.get('qa_contact')
-                        ]
-                    else:
-                        print("Failed to get bug information. Please check the URL provided on the configuration file.")
+                for line_number, line in enumerate(lines[1:], start=1):
+                    try:
+                        parts = line.strip().split(',')
+                        if len(parts) < 1:
+                            raise ValueError(f"Line {line_number} does not have the expected format: {line}")
 
-                    ## Bug HISTORY (Activity log)
-                    history_url = base_url + '/history'
-                    response = requests.get(history_url, headers=headers)
-                    if response.status_code == 200:
-                        history_data = response.json()
-                        # Get all the bug history
-                        history = history_data.get('bugs', {})[0].get("history", {})
-                        # Convert history to JSON string
-                        history_json = json.dumps(history)
-                        row.append(history_json)
-                    else:
-                        print("Failed to get bug history. Please try again.")
-                        row.append("")
+                        bug_id = parts[0].strip().strip()
+                        if not bug_id.isdigit():
+                            raise ValueError(f"Extracted bug ID is not a digit on line {line_number}: {bug_id}")
+                        base_url = os.getenv('MAIN_PAGE') + '/rest/bug/' + bug_id
 
-                    ## Comments and description
-                    comment_url = base_url + '/comment'
-                    response = requests.get(comment_url, headers=headers)
-                    if response.status_code == 200:
-                        comment_data = response.json()
-                        # Get all the bug comments
-                        bug_comments = comment_data.get('bugs', {}).get(bug_id, {})
-                        description = ""
-                        bug_comments_split = bug_comments.get('comments', [])
-                        # Find the description (count=0)
-                        for comment in bug_comments_split:
-                            if comment.get('count') == 0:
-                                description = comment.get('text').replace('\n', '\\n').replace('\r', '\\r').replace('\"', '\\\"')
-                        # Convert bug_comments to JSON string
-                        bug_comments_json = json.dumps(bug_comments)
-                        row[32] = description
-                        row.append(bug_comments_json)
-                    else:
-                        print("Failed to get bug comments. Please try again.")
-                        row.append("")
+                        ## Base information
+                        response = requests.get(base_url, headers=headers)
+                        if response.status_code == 200:
+                            data = response.json()
+                            bug = data.get('bugs', [])[0]
+                            bug_url = os.getenv('MAIN_PAGE') + 'show_bug.cgi?id=' + str(bug.get('id'))
+                            row = [
+                                bug_url, bug.get('id'), bug.get('alias'), bug.get('classification'), bug.get('component'), 
+                                bug.get('product'), bug.get('version'), bug.get('platform'), bug.get('op_sys'), 
+                                bug.get('status'), bug.get('resolution'), bug.get('depends_on'), bug.get('dupe_of'), 
+                                bug.get('blocks'), bug.get('groups'), bug.get('flags'), bug.get('severity'), 
+                                bug.get('priority'), bug.get('deadline'), bug.get('target_milestone'), bug.get('creator'), 
+                                bug.get('creator_detail'), bug.get('creation_time'), bug.get('assigned_to'), 
+                                bug.get('assigned_to_detail'), bug.get('cc'), bug.get('cc_detail'), 
+                                bug.get('is_cc_accessible'), bug.get('is_confirmed'), bug.get('is_open'), 
+                                bug.get('is_creator_accessible'), bug.get('summary'), "BUG_DESCRIPTION", bug.get('url'), 
+                                bug.get('whiteboard'), bug.get('keywords'), bug.get('see_also'), bug.get('last_change_time'), 
+                                bug.get('qa_contact')
+                            ]
+                        else:
+                            print("Failed to get bug information. Please check the URL provided on the configuration file.")
+                            continue #Skip to next issue
+                        
+                        ## Bug HISTORY (Activity log)
+                        history_url = base_url + '/history'
+                        response = requests.get(history_url, headers=headers)
+                        if response.status_code == 200:
+                            history_data = response.json()
+                            # Get all the bug history
+                            history = history_data.get('bugs', {})[0].get("history", {})
+                            # Convert history to JSON string
+                            history_json = json.dumps(history)
+                            row.append(history_json)
+                        else:
+                            print(f"Failed to get bug history for bug ID {bug_id} on line {line_number}.")
+                            row.append("")
+                        
+                        ## Comments and description
+                        comment_url = base_url + '/comment'
+                        response = requests.get(comment_url, headers=headers)
+                        if response.status_code == 200:
+                            comment_data = response.json()
+                            # Get all the bug comments
+                            bug_comments = comment_data.get('bugs', {}).get(bug_id, {})
+                            description = ""
+                            bug_comments_split = bug_comments.get('comments', [])
+                            # Find the description (count=0)
+                            for comment in bug_comments_split:
+                                if comment.get('count') == 0:
+                                    description = comment.get('text').replace('\n', '\\n').replace('\r', '\\r').replace('\"', '\\\"')
+                            # Convert bug_comments to JSON string
+                            bug_comments_json = json.dumps(bug_comments)
+                            row[32] = description
+                            row.append(bug_comments_json)
+                        else:
+                            print(f"Failed to get bug comments for bug ID {bug_id} on line {line_number}.")
+                            row.append("")
 
-                    ## Attachments
-                    attachment_url = base_url + '/attachment'
-                    response = requests.get(attachment_url, headers=headers)
-                    if response.status_code == 200:
-                        attachment_data = response.json()
-                        # Get all the bug attachments
-                        attachments = attachment_data.get('bugs', {}).get(bug_id, [])
-                        # Convert attachments to JSON string
-                        attachments_json = json.dumps(attachments)
-                        row.append(attachments_json)
-                    else:
-                        print("Failed to get bug attachments. Please try again.")
-                        row.append("")
+                        ## Attachments
+                        attachment_url = base_url + '/attachment'
+                        response = requests.get(attachment_url, headers=headers)
+                        if response.status_code == 200:
+                            attachment_data = response.json()
+                            # Get all the bug attachments
+                            attachments = attachment_data.get('bugs', {}).get(bug_id, [])
+                            # Convert attachments to JSON string
+                            attachments_json = json.dumps(attachments)
+                            row.append(attachments_json)
+                        else:
+                            print("Failed to get bug attachments. Please try again.")
+                            row.append("")
                     
-                    #Finally, we write all the information for this bug in the result file
-                    writer.writerow(row)
-                    time.sleep(0.1)## Avoiding to be blocked by the server
+                        #Finally, we write all the information for this bug in the result file
+                        writer.writerow(row)
+                    #time.sleep(0.1)## Avoiding to be blocked by the server
+                    except ValueError as val_err:
+                        print(f"Value error on line {line_number}: {val_err}")
+                    except requests.exceptions.HTTPError as http_err:
+                        print(f"HTTP error occurred for bug ID {bug_id} on line {line_number}: {http_err}")
+                    except requests.exceptions.RequestException as req_err:
+                        print(f"Request exception occurred for bug ID {bug_id} on line {line_number}: {req_err}")
+                    except Exception as e:
+                        print(f"An unexpected error occurred on line {line_number}: {e}")
+                    
         except FileNotFoundError:
             print(f"Error: The file '{file}' was not found.")
         except Exception as e:
             print(f"An error occurred while reading the file: {e}")
-
-
-            
     print(f"Filtered issues saved in {result_file}")
