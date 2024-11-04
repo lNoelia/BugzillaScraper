@@ -87,7 +87,7 @@ def get_filtered_issues(resolution,status):
                                 bug.get('qa_contact')
                             ]
                         else:
-                            print("Failed to get bug information. Please check the URL provided on the configuration file.")
+                            print(f"Failed to get bug information for bug ID {bug_id}. Please check the URL provided on the configuration file.")
                             continue #Skip to next issue
                         
                         ## Bug HISTORY (Activity log)
@@ -136,7 +136,7 @@ def get_filtered_issues(resolution,status):
                             attachments_json = json.dumps(attachments)
                             row.append(attachments_json)
                         else:
-                            print("Failed to get bug attachments. Please try again.")
+                            print(f"Failed to get bug attachments for bug ID {bug_id}. Please try again.")
                             row.append("")
                     
                         #Finally, we write all the information for this bug in the result file
