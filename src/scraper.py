@@ -31,8 +31,6 @@ def fetch_bugzilla_issues(base_url, resolution, status, limit_per_query=0):
             if os.getenv('COMPONENT'):
                 url += f'&component={os.getenv('COMPONENT')}'
             
-            print(f"Getting list of issues from {url}...")
-            
             response = requests.get(url)
             response.raise_for_status()
             
@@ -59,7 +57,6 @@ def fetch_bugzilla_issues(base_url, resolution, status, limit_per_query=0):
             if start == 0 and limit_per_query == 0:
                 # Set the limit per query based on the number of rows in the first batch
                 limit_per_query = len(rows)
-                print(f"Determined limit per query: {limit_per_query}")
 
             if len(rows) < limit_per_query:
                 break
