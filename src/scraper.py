@@ -4,33 +4,78 @@ from dotenv import load_dotenv
 import csv
 import json
 import time
+from io import StringIO
 
 load_dotenv()
 
-def get_list_issues(url,resolution,status):
-    url = url + '/buglist.cgi?action=wrap&query_format=advanced'
-    if(resolution != 'TOTAL'):
-        url = url + '&resolution='+resolution
-    if(status != 'TOTAL'):
-        url = url + '&status='+status
-    if(os.getenv('CLASSIFICATION') != ''):
-        url = url + '&classification='+os.getenv('CLASSIFICATION')
-    if(os.getenv('PRODUCT') != ''):
-        url = url + '&product='+os.getenv('PRODUCT')
-    if(os.getenv('COMPONENT') != ''):
-        url = url + '&component='+os.getenv('COMPONENT')
-    url = url + '&ctype=csv&human=1'
-    result_file='data/list_issues_'+resolution+'_'+status+'.txt'
-    response = requests.get(url)
-    if response.status_code == 200:
-        with open(result_file, 'wb') as file:
-            file.write(response.content)
-        print(f"List of issues saved in {result_file})")
-    else:
-        print("Failed to get issues. Please check the URL provided on the configuration file.")
+
+def fetch_bugzilla_issues(base_url, resolution, status, limit_per_query=0):
+    start = 0
+    
+    result_file = f'data/list_issues_{resolution}_{status}.csv'
+    with open(result_file, 'w', newline='', encoding='utf-8') as csvfile:
+        csvwriter = None
+        
+        while True:
+            # Build the full URL with pagination parameters
+            url = f"{base_url}/buglist.cgi?action=wrap&query_format=advanced&ctype=csv&human=1&limit={limit_per_query}&offset={start}"
+            
+            if resolution != 'TOTAL':
+                url += f'&resolution={resolution}'
+            if status != 'TOTAL':
+                url += f'&status={status}'
+            if os.getenv('CLASSIFICATION'):
+                url += f'&classification={os.getenv('CLASSIFICATION')}'
+            if os.getenv('PRODUCT'):
+                url += f'&product={os.getenv('PRODUCT')}'
+            if os.getenv('COMPONENT'):
+                url += f'&component={os.getenv('COMPONENT')}'
+            
+            print(f"Getting list of issues from {url}...")
+            
+            response = requests.get(url)
+            response.raise_for_status()
+            
+            # Read the CSV content
+            csv_content = StringIO(response.text)
+            csvreader = csv.reader(csv_content)
+            
+            # Write the headers only once
+            if start == 0:
+                headers = next(csvreader)
+                csvwriter = csv.writer(csvfile)
+                csvwriter.writerow(headers)
+            else:
+                next(csvreader)  # Skip headers for subsequent batches
+            
+            rows = list(csvreader)
+            
+            if not rows:
+                break
+            
+            # Write the rows to the CSV file
+            csvwriter.writerows(rows)
+
+            if start == 0 and limit_per_query == 0:
+                # Set the limit per query based on the number of rows in the first batch
+                limit_per_query = len(rows)
+                print(f"Determined limit per query: {limit_per_query}")
+
+            if len(rows) < limit_per_query:
+                break
+            
+            start += limit_per_query
+
+def get_list_issues(base_url, resolution, status):
+    print(f"Getting list of issues from {base_url} with resolution={resolution} and status={status}...")
+    
+    fetch_bugzilla_issues(base_url, resolution, status)
+    
+    result_file = f'data/list_issues_{resolution}_{status}.csv'
+    print(f"List of issues saved in {result_file}")
 
 def get_filtered_issues(resolution,status):
-    file = 'data/list_issues_'+resolution+'_'+status+'.txt'
+    file = 'data/list_issues_'+resolution+'_'+status+'.csv'
     result_file='data/filtered_issues_'+resolution+'_'+status+'.csv'
 
     ## Headers for all request:

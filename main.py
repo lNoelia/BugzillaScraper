@@ -35,7 +35,7 @@ def main():
                 resolution = resolution_options[int(resolution_status[0])-1]
                 status = status_options[int(resolution_status[1])-1]
                 print("Resolution and Status selected:"+ resolution+ " and "+ status)
-                result_file='data/list_issues_'+resolution+'_'+status+'.txt'
+                result_file='data/list_issues_'+resolution+'_'+status+'.csv'
                 # Check if we already have the list of issues 
                 if os.path.exists(result_file):
                     get_list_again = ask_user_input_y_or_n()
