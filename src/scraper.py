@@ -11,7 +11,7 @@ load_dotenv()
 
 def fetch_bugzilla_issues(base_url, resolution, status, limit_per_query=0):
     start = 0
-    
+    print(limit_per_query)
     result_file = f'data/list_issues_{resolution}_{status}.csv'
     with open(result_file, 'w', newline='', encoding='utf-8') as csvfile:
         csvwriter = None
@@ -25,11 +25,11 @@ def fetch_bugzilla_issues(base_url, resolution, status, limit_per_query=0):
             if status != 'TOTAL':
                 url += f'&status={status}'
             if os.getenv('CLASSIFICATION'):
-                url += f'&classification={os.getenv('CLASSIFICATION')}'
+                url += f"&classification={os.getenv('CLASSIFICATION')}"
             if os.getenv('PRODUCT'):
-                url += f'&product={os.getenv('PRODUCT')}'
+                url += f"&product={os.getenv('PRODUCT')}"
             if os.getenv('COMPONENT'):
-                url += f'&component={os.getenv('COMPONENT')}'
+                url += f"&component={os.getenv('COMPONENT')}"
             
             response = requests.get(url)
             response.raise_for_status()
@@ -65,8 +65,8 @@ def fetch_bugzilla_issues(base_url, resolution, status, limit_per_query=0):
 
 def get_list_issues(base_url, resolution, status):
     print(f"Getting list of issues from {base_url} with resolution={resolution} and status={status}...")
-    
-    fetch_bugzilla_issues(base_url, resolution, status)
+    limit_per_query = int(os.getenv('QUERY_LIMIT',0))
+    fetch_bugzilla_issues(base_url, resolution, status, limit_per_query)
     
     result_file = f'data/list_issues_{resolution}_{status}.csv'
     print(f"List of issues saved in {result_file}")
