@@ -11,7 +11,6 @@ load_dotenv()
 
 def fetch_bugzilla_issues(base_url, resolution, status, limit_per_query=0):
     start = 0
-    print(limit_per_query)
     result_file = f'data/list_issues_{resolution}_{status}.csv'
     with open(result_file, 'w', newline='', encoding='utf-8') as csvfile:
         csvwriter = None
@@ -54,9 +53,11 @@ def fetch_bugzilla_issues(base_url, resolution, status, limit_per_query=0):
             # Write the rows to the CSV file
             csvwriter.writerows(rows)
 
-            if start == 0 and limit_per_query == 0:
-                # Set the limit per query based on the number of rows in the first batch
-                limit_per_query = len(rows)
+            if start == 0 and (limit_per_query>len(rows) or limit_per_query == 0): 
+                    #If the query limit is greater than the number of issues returned by the server or 
+                    #if the query limit is not set, we set the limit per query as the number of issues returned by the server
+                    limit_per_query = len(rows)
+                    print("Changed limit per query to: ", limit_per_query)
 
             if len(rows) < limit_per_query:
                 break
@@ -71,9 +72,9 @@ def get_list_issues(base_url, resolution, status):
     result_file = f'data/list_issues_{resolution}_{status}.csv'
     print(f"List of issues saved in {result_file}")
 
-def get_filtered_issues(resolution,status):
+def get_dataset_issues(resolution,status):
     file = 'data/list_issues_'+resolution+'_'+status+'.csv'
-    result_file='data/filtered_issues_'+resolution+'_'+status+'.csv'
+    result_file='data/dataset_issues_'+resolution+'_'+status+'.csv'
 
     ## Headers for all request:
     headers = {
@@ -197,4 +198,4 @@ def get_filtered_issues(resolution,status):
             print(f"Error: The file '{file}' was not found.")
         except Exception as e:
             print(f"An error occurred while reading the file: {e}")
-    print(f"Filtered issues saved in {result_file}")
+    print(f"Dataset saved in {result_file}")
