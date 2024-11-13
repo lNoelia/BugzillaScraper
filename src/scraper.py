@@ -5,6 +5,7 @@ import csv
 import json
 import time
 from io import StringIO
+from tqdm import tqdm
 
 load_dotenv()
 
@@ -72,65 +73,67 @@ def get_list_issues(base_url, resolution, status):
     result_file = f'data/list_issues_{resolution}_{status}.csv'
     print(f"List of issues saved in {result_file}")
 
-def get_dataset_issues(resolution,status):
-    file = 'data/list_issues_'+resolution+'_'+status+'.csv'
-    result_file='data/dataset_issues_'+resolution+'_'+status+'.csv'
 
-    ## Headers for all request:
+def get_dataset_issues(resolution, status):
+    file = 'data/list_issues_' + resolution + '_' + status + '.csv'
+    result_file = 'data/dataset_issues_' + resolution + '_' + status + '.csv'
+
+    # Headers for all requests
     headers = {
-        'Accept': 'application/json'  # Especifica que esperas una respuesta en JSON
+        'Accept': 'application/json'  # Specifies expecting a JSON response
     }
-    with open(result_file, 'w', encoding='utf-8',newline='', errors='surrogateescape') as res_file:
-        writer = csv.writer(res_file, escapechar='\\', quoting=csv.QUOTE_MINIMAL)
-        #Header of result file
-        ## bug_url, id, alias, classification, component, product, version, platform, op_sys, status, resolution, depends_on, dupe_of, blocks, groups, flags, severity, priority, deadline, target_milestone, creator, creator_detail , creation_time, assigned_to, assigned_to_detail,cc ,cc_detail,is_cc_acessible, is_confirmed, is_open, is_creator_accessible, summary, description, url(something related to bug),whiteboard, keywords, see_also, last_change_time, qa_contact
-        header = [
-            "Issue URL", "ID", "Alias", "Classification", "Component", "Product", "Version", "Platform", "Op sys", 
-            "Status", "Resolution", "Depends on", "Dupe of", "Blocks", "Groups", "Flags", "Severity", "Priority", 
-            "Deadline", "Target Milestone", "Creator", "Creator Detail", "Creation time", "Assigned to", 
-            "Assigned to detail", "CC", "CC detail", "Is CC accessible", "Is confirmed", "Is open", 
-            "Is creator accessible", "Summary", "Description", "URL", "Whiteboard", "Keywords", "See also", 
-            "Last change time", "QA contact","History/Activity Log", "Comments", "Attachments"
-        ]
 
-        writer.writerow(header)
+    # Header for the result file
+    header = [
+        "Issue URL", "ID", "Alias", "Classification", "Component", "Product", "Version", "Platform", "Op sys", 
+        "Status", "Resolution", "Depends on", "Dupe of", "Blocks", "Groups", "Flags", "Severity", "Priority", 
+        "Deadline", "Target Milestone", "Creator", "Creator Detail", "Creation time", "Assigned to", 
+        "Assigned to detail", "CC", "CC detail", "Is CC accessible", "Is confirmed", "Is open", 
+        "Is creator accessible", "Summary", "Description", "URL", "Whiteboard", "Keywords", "See also", 
+        "Last change time", "QA contact", "History/Activity Log", "Comments", "Attachments"
+    ]
 
-        try:
-            with open(file, 'r',encoding='utf-8', errors='surrogateescape') as f:
-                lines = f.readlines()
-                print(f"Total lines in input file: {len(lines)}")  # Debugging: print total number of lines
-                for line_number, line in enumerate(lines[1:], start=1):
+    try:
+        with open(file, 'r', encoding='utf-8', errors='surrogateescape') as f:
+            lines = f.readlines()
+            total_lines = len(lines) - 1  # Exclude the header line
+
+            with open(result_file, 'w', encoding='utf-8', newline='', errors='surrogateescape') as res_file:
+                writer = csv.writer(res_file, escapechar='\\', quoting=csv.QUOTE_MINIMAL)
+                writer.writerow(header)
+
+                for line_number, line in enumerate(tqdm(lines[1:], total=total_lines, desc="Processing issues"), start=1):
                     try:
                         parts = line.strip().split(',')
                         if len(parts) < 1:
                             raise ValueError(f"Line {line_number} does not have the expected format: {line}")
 
-                        bug_id = parts[0].strip().strip()
+                        bug_id = parts[0].strip()
                         if not bug_id.isdigit():
                             raise ValueError(f"Extracted bug ID is not a digit on line {line_number}: {bug_id}")
+
                         base_url = os.getenv('MAIN_PAGE') + '/rest/bug/' + bug_id
 
-                        ## Base information
-                        row = get_base_information(base_url,headers,bug_id)
-                        if not row: # If the row is empty, skip to the next issue
+                        # Get base information
+                        row = get_base_information(base_url, headers, bug_id)
+                        if not row:  # If row is empty, skip to the next issue
                             continue
-                        
-                        ## Bug HISTORY (Activity log)
-                        history_url = base_url + '/history'
-                        row = get_history(history_url,headers,row,bug_id)
-                        
-                        
-                        ## Comments and description
-                        comment_url = base_url + '/comment'
-                        row = get_comments(comment_url,headers,row,bug_id)
 
-                        ## Attachments
+                        # Get bug history (activity log)
+                        history_url = base_url + '/history'
+                        row = get_history(history_url, headers, row, bug_id)
+
+                        # Get comments and description
+                        comment_url = base_url + '/comment'
+                        row = get_comments(comment_url, headers, row, bug_id)
+
+                        # Get attachments
                         attachment_url = base_url + '/attachment'
-                        row = get_attachments(attachment_url,headers,row,bug_id)
-                    
-                        #Finally, we write all the information for this bug in the result file
+                        row = get_attachments(attachment_url, headers, row, bug_id)
+
+                        # Finally, write all information for this issue to the result file
                         writer.writerow(row)
-                    #time.sleep(0.1) ## Avoiding to be blocked by the server
+
                     except ValueError as val_err:
                         print(f"Value error on line {line_number}: {val_err}")
                     except requests.exceptions.HTTPError as http_err:
@@ -139,11 +142,12 @@ def get_dataset_issues(resolution,status):
                         print(f"Request exception occurred for bug ID {bug_id} on line {line_number}: {req_err}")
                     except Exception as e:
                         print(f"An unexpected error occurred on line {line_number}: {e}")
-                    
-        except FileNotFoundError:
-            print(f"Error: The file '{file}' was not found.")
-        except Exception as e:
-            print(f"An error occurred while reading the file: {e}")
+
+    except FileNotFoundError:
+        print(f"Error: The file '{file}' was not found.")
+    except Exception as e:
+        print(f"An error occurred while reading the file: {e}")
+
     print(f"Dataset saved in {result_file}")
 
 def get_base_information(base_url, headers, bug_id, count=0):
