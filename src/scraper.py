@@ -12,6 +12,10 @@ load_dotenv()
 
 def fetch_bugzilla_issues(base_url, resolution, status, limit_per_query=0):
     start = 0
+    
+    if not os.path.exists('data'):
+        os.makedirs('data')
+    
     result_file = f'data/list_issues_{resolution}_{status}.csv'
     with open(result_file, 'w', newline='', encoding='utf-8') as csvfile:
         csvwriter = None
@@ -75,8 +79,8 @@ def get_list_issues(base_url, resolution, status):
 
 
 def get_dataset_issues(resolution, status):
-    file = 'data/list_issues_' + resolution + '_' + status + '.csv'
-    result_file = 'data/dataset_issues_' + resolution + '_' + status + '.csv'
+    file = f"data/list_issues_{resolution}_{status}.csv"
+    result_file = f"data/dataset_issues_{resolution}_{status}.csv"
 
     # Headers for all requests
     headers = {

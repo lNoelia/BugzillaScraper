@@ -1,6 +1,7 @@
 import click
 
 from issuex.commands.test import test
+from issuex.commands.run import run
 
 
 class IssuexCLI(click.Group):
@@ -20,6 +21,7 @@ def cli():
 
 
 cli.add_command(test)
+cli.add_command(run)
 
 if __name__ == '__main__':
     cli()
