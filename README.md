@@ -13,6 +13,12 @@ source venv/bin/activate
 cp example.env .env
 ```
 
+## Install dependencies
+
+```
+pip install -r requirements.txt
+``` 
+
 ## Install CLI
 
 ```
