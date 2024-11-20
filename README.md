@@ -12,3 +12,17 @@ source venv/bin/activate
 ```
 pip install -e ./
 ```
+
+## Using `Issuex CLI`
+
+### Run the tool
+
+```
+issuex run
+```
+
+### Execute the tool with default settings
+
+```
+issuex run:default
+```
