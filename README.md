@@ -7,6 +7,12 @@ python -m venv venv
 source venv/bin/activate
 ```
 
+## Create environment variables
+
+```
+cp example.env .env
+```
+
 ## Install CLI
 
 ```
