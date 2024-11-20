@@ -8,7 +8,7 @@ from src.utils import (
 from src.scraper import get_list_issues, get_dataset_issues
 
 
-def run_scrapper(resolution=None, status=None):
+def run_scrapper(resolution=None, status=object()):  # Usamos object() como valor sentinela
     # Obtener la URL principal desde el entorno
     url = os.getenv('MAIN_PAGE')
     if not url:
@@ -22,17 +22,26 @@ def run_scrapper(resolution=None, status=None):
     resolution_options = get_resolution_options(field_url)
     status_options = get_status_options(field_url)
 
-    # Si resolution y status no están definidos, entra en modo interactivo
-    if not resolution or not status:
+    # Si resolution o status no están definidos, entra en modo interactivo
+    if resolution is None or status is object():  # Usamos el sentinela para detectar valores ausentes
         print("Resolution or status not provided, entering interactive mode...")
-        resolution_status = choose_resolution_status(resolution_options, status_options)
-        resolution = resolution_options[int(resolution_status[0]) - 1]
-        status = status_options[int(resolution_status[1]) - 1]
+        print("Resolution Options:")
+        for i, opt in enumerate(resolution_options, start=1):
+            print(f"{i}. {opt}")
+        resolution_index = int(input("Select a resolution option: ")) - 1
+        resolution = resolution_options[resolution_index]
+
+        print("Status Options:")
+        for i, opt in enumerate(status_options, start=1):
+            print(f"{i}. {opt}")
+        status_index = int(input("Select a status option: ")) - 1
+        status = status_options[status_index]
+
+    # Validar que los valores proporcionados sean válidos
     else:
-        # Validar que los valores proporcionados sean válidos
         if resolution not in resolution_options:
             raise ValueError(f"Invalid resolution: {resolution}. Valid options: {resolution_options}")
-        if status not in status_options:
+        if status not in status_options and status is not None:
             raise ValueError(f"Invalid status: {status}. Valid options: {status_options}")
 
     print(f"Resolution and Status selected: {resolution} and {status}")
@@ -55,7 +64,6 @@ def run_scrapper(resolution=None, status=None):
     # Obtener el conjunto de datos de issues
     get_dataset_issues(resolution, status)
     print(f"The list of issues has been saved in the file: {result_file}")
-
 
 if __name__ == '__main__':
     run_scrapper()
