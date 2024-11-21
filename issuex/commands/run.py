@@ -9,7 +9,7 @@ def run():
     run_scrapper()
 
 
-@click.command('run:default', help="Run the issue processing flow with default parameters (No filter applied to status or resolution).")
+@click.command('run:default', short_help="Run the issue processing flow with default parameters (No filter applied to status or resolution).")
 def run_default():
     """Wrapper to call the main function with default parameters."""
     run_scrapper(resolution="TOTAL", status="TOTAL")
