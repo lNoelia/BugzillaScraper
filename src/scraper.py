@@ -10,7 +10,7 @@ from tqdm import tqdm
 load_dotenv()
 
 
-def fetch_bugzilla_issues(base_url, resolution, status, limit_per_query=0):
+def fetch_bugzilla_issues(base_url, resolution, status, date, limit_per_query=0 ):
     start = 0
     
     if not os.path.exists('data'):
@@ -34,6 +34,8 @@ def fetch_bugzilla_issues(base_url, resolution, status, limit_per_query=0):
                 url += f"&product={os.getenv('PRODUCT')}"
             if os.getenv('COMPONENT'):
                 url += f"&component={os.getenv('COMPONENT')}"
+            if date != None:
+                url += f"&chfield=[Bug+creation]&chfieldvalue=&chfieldfrom={date}"
             
             response = requests.get(url)
             response.raise_for_status()
@@ -69,10 +71,10 @@ def fetch_bugzilla_issues(base_url, resolution, status, limit_per_query=0):
             
             start += limit_per_query
 
-def get_list_issues(base_url, resolution, status):
+def get_list_issues(base_url, resolution, status, date ):
     print(f"Getting list of issues from {base_url} with resolution={resolution} and status={status}...")
     limit_per_query = int(os.getenv('QUERY_LIMIT',0))
-    fetch_bugzilla_issues(base_url, resolution, status, limit_per_query)
+    fetch_bugzilla_issues(base_url, resolution, status, date,limit_per_query)
     
     result_file = f'data/list_issues_{resolution}_{status}.csv'
     print(f"List of issues saved in {result_file}")

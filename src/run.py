@@ -8,7 +8,7 @@ from src.utils import (
 from src.scraper import get_list_issues, get_dataset_issues
 
 
-def run_scrapper(resolution=None, status=object()):  # Usamos object() como valor sentinela
+def run_scrapper(resolution=None, status=object(), from_date=None):  # Usamos object() como valor sentinela
     # Obtener la URL principal desde el entorno
     url = os.getenv('MAIN_PAGE')
     if not url:
@@ -57,9 +57,9 @@ def run_scrapper(resolution=None, status=object()):  # Usamos object() como valo
         print(f"The file {result_file} already exists.")
         get_list_again = ask_user_input_y_or_n("Do you want to regenerate the list of issues? (y/n): ")
         if get_list_again.lower() == 'y':
-            get_list_issues(url, resolution, status)
+            get_list_issues(url, resolution, status, from_date)
     else:
-        get_list_issues(url, resolution, status)
+        get_list_issues(url, resolution, status, from_date)
 
     # Obtener el conjunto de datos de issues
     get_dataset_issues(resolution, status)
