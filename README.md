@@ -24,15 +24,15 @@ Our dataset contains the bug reported for 9 popular products/components from Ecl
 
 | Repository  | Product / Component     | Number of reports |
 | ----------- | -----------             |      :----:       |
-| Eclipse     | Platform                |        ---        |
-| Eclipse     | CDT                     |        ---        |
-| Eclipse     | JDT                     |        ---        |
-| Eclipse     | PDE                     |        ---        |
-| Eclipse     | Equinox                 |       14.559       |
-| Eclipse     | BIRT                    |       23.308       |
-| Eclipse     | Mylyn                   |       13.906       |
-| Eclipse     | TPTP                    |       10.579       |
-| Eclipse     | Papyrus                 |       13.253       |
+| Eclipse     | Platform                |      122.497      |
+| Eclipse     | JDT                     |       63.266      |
+| Eclipse     | CDT                     |       23.371      |
+| Eclipse     | BIRT                    |       23.308      |
+| Eclipse     | PDE                     |       17.639      |
+| Eclipse     | Equinox                 |       14.559      |
+| Eclipse     | Mylyn                   |       13.906      |
+| Eclipse     | TPTP                    |       10.579      |
+| Eclipse     | Papyrus                 |       13.253      |
 | Mozilla     | Core                    |        ---        |
 ||**Total number of issues:**| --- |
 
@@ -43,7 +43,7 @@ Our dataset contains the bug reported for 9 popular products/components from Ecl
     $ git clone https://github.com/lNoelia/BugzillaScraper
     $ cd BugzillaScraper
 
-#### 2. Virtual environment
+#### 2. Using a virtual environment
 
 ```
 python -m venv venv
@@ -73,9 +73,11 @@ pip install -e ./
 
 ### Run the tool
 
+Run the tool and specify the status and resolution of the issues to be extracted.
 ```
 issuex run
 ```
+Optionally, you can use --from-date "YYYY-MM-DD" to obtain the issues that were created from that date until today.
 
 ### Execute the tool with default settings
 
